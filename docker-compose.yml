@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: rideshare-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rideshare
+      POSTGRES_PASSWORD: rideshare_dev
+      POSTGRES_DB: rideshare
+    ports:
+      - "5433:5432"
+    volumes:
+      - rideshare-postgres-data:/var/lib/postgresql
+
+  redis:
+    image: redis:7
+    container_name: rideshare-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+
+volumes:
+  rideshare-postgres-data:
