@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="RideShare.Api/RideShare.Api.csproj" />
+  <Project Path="RideShare.Domain/RideShare.Domain.csproj" />
+  <Project Path="RideShare.Infrastructure/RideShare.Infrastructure.csproj" />
+  <Project Path="RideShare.Tests/RideShare.Tests.csproj" />
+</Solution>
