@@ -1,4 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using RideShare.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<RideShareDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("RideShareDb")));
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
