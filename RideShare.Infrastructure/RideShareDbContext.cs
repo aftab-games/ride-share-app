@@ -8,9 +8,9 @@ public class RideShareDbContext : DbContext
     public RideShareDbContext(DbContextOptions<RideShareDbContext> options)
         : base(options) { }
 
-    public DbSet<Rider> Riders => null!;
-    public DbSet<Driver> Drivers => null!;
-    public DbSet<Ride> Rides => null!;
+    public DbSet<Rider> Riders { get; set; } = null!;
+    public DbSet<Driver> Drivers { get; set; } = null!;
+    public DbSet<Ride> Rides { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
