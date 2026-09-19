@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace RideShare.Api.Services;
+namespace RideShare.Infrastructure;
 
 public class DriverLocationStore : IDriverLocationStore
 {
@@ -15,6 +15,4 @@ public class DriverLocationStore : IDriverLocationStore
     public DriverLocation? GetLocation(Guid driverId)
         => _locations.TryGetValue(driverId, out var location) ? location : null;
 
-    public IReadOnlyDictionary<Guid, DriverLocation> GetAllLocations()
-        => _locations;
 }
