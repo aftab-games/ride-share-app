@@ -62,7 +62,7 @@ public class RideHub : Hub
     public async Task AcceptRide(Guid rideId, Guid driverId)
     {
         var ride = await _db.Rides.FindAsync(rideId);
-        if (ride is null || ride.Status != RideStatus.Requested)
+        if (ride is null || !ride.CanTransitionTo(RideStatus.Accepted))
         {
             await Clients.Caller.SendAsync("RideAcceptFailed", rideId);
             return;
@@ -84,7 +84,7 @@ public class RideHub : Hub
     public async Task StartRide(Guid rideId)
     {
         var ride = await _db.Rides.FindAsync(rideId);
-        if (ride is null || ride.Status != RideStatus.Accepted)
+        if (ride is null || !ride.CanTransitionTo(RideStatus.InProgress))
         {
             await Clients.Caller.SendAsync("RideActionFailed", rideId, "Ride cannot be started.");
             return;
@@ -105,7 +105,7 @@ public class RideHub : Hub
     public async Task CompleteRide(Guid rideId)
     {
         var ride = await _db.Rides.FindAsync(rideId);
-        if (ride is null || ride.Status != RideStatus.InProgress)
+        if (ride is null || !ride.CanTransitionTo(RideStatus.Completed))
         {
             await Clients.Caller.SendAsync("RideActionFailed", rideId, "Ride cannot be completed.");
             return;

@@ -9,4 +9,17 @@ public class Ride
     public required Coordinate Pickup { get; set; }
     public required Coordinate Dropoff { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public bool CanTransitionTo(RideStatus newStatus)
+    {
+        return (Status, newStatus) switch
+        {
+            (RideStatus.Requested, RideStatus.Accepted) => true,
+            (RideStatus.Requested, RideStatus.Cancelled) => true,
+            (RideStatus.Accepted, RideStatus.Cancelled) => true,
+            (RideStatus.Accepted, RideStatus.InProgress) => true,
+            (RideStatus.InProgress, RideStatus.Completed) => true,
+            _ => false
+        };
+    }
 }
