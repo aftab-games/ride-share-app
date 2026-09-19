@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RideShareDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("RideShareDb")));
 builder.Services.AddControllers();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR().AddStackExchangeRedis("localhost:6380");
 builder.Services.AddSingleton<IConnectionTracker, ConnectionTracker>(); //SignalR connection tracker service as a singleton to track connected clients.
 builder.Services.AddSingleton<IDriverLocationStore, RedisDriverLocationStore>(); //Driver location store service as a singleton to manage driver locations.
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6380")); //Redis connection multiplexer as a singleton to manage Redis connections.
