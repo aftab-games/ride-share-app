@@ -21,14 +21,14 @@
     connection.start()
         .then(() => {
             console.log("Connected.");
-            const driverId = "8c711c9e-3a5c-4ff1-bdbb-0bddc16c5f28"; // your real Driver id from earlier
-            return connection.invoke("RegisterAsDriver", driverId);
+            const riderId = "0698b4e7-f4e7-42f4-8c09-7622d92462ff";  // your real Rider id from earlier
+            return connection.invoke("RegisterAsRider", riderId);
         })
-        .then(() => console.log("Registered as driver."))
+        .then(() => console.log("Registered as Rider."))
         .catch(err => console.error("Error:", err));
 
     // Expose for manual testing from the browser console:
-    window.acceptRide = (rideId, driverId) => connection.invoke("AcceptRide", rideId, driverId);
+    //window.acceptRide = (rideId, driverId) => connection.invoke("AcceptRide", rideId, driverId);
     </script>
 </body>
 </html>

@@ -5,22 +5,33 @@ namespace RideShare.Api.Services;
 public class ConnectionTracker : IConnectionTracker
 {
     private readonly ConcurrentDictionary<Guid, string> _driverToConnection = new();
-    private readonly ConcurrentDictionary<string, Guid> _connectionToDriver = new();
+    private readonly ConcurrentDictionary<Guid, string> _riderToConnection = new();
+    private readonly ConcurrentDictionary<string, Guid> _connectionToUser = new();
 
     public void AddDriverConnection(Guid driverId, string connectionId)
     {
         _driverToConnection[driverId] = connectionId;
-        _connectionToDriver[connectionId] = driverId;
+        _connectionToUser[connectionId] = driverId;
+    }
+
+    public void AddRiderConnection(Guid riderId, string connectionId)
+    {
+        _riderToConnection[riderId] = connectionId;
+        _connectionToUser[connectionId] = riderId;
     }
 
     public void RemoveConnection(string connectionId)
     {
-        if (_connectionToDriver.TryRemove(connectionId, out var driverId))
+        if (_connectionToUser.TryRemove(connectionId, out var userId))
         {
-            _driverToConnection.TryRemove(driverId, out _);
+            _driverToConnection.TryRemove(userId, out _);
+            _riderToConnection.TryRemove(userId, out _);
         }
     }
 
     public string? GetDriverConnection(Guid driverId)
         => _driverToConnection.TryGetValue(driverId, out var connectionId) ? connectionId : null;
+
+    public string? GetRiderConnection(Guid riderId)
+        => _riderToConnection.TryGetValue(riderId, out var connectionId) ? connectionId : null;
 }
