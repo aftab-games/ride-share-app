@@ -17,6 +17,7 @@
     connection.on("RideRequested", (ride) => console.log("New ride requested:", ride));
     connection.on("RideAccepted", (rideId, driverId) => console.log("Ride accepted:", rideId, "by driver:", driverId));
     connection.on("RideAcceptFailed", (rideId) => console.log("Failed to accept ride:", rideId));
+    connection.on("RideActionFailed", (rideId, reason) => console.log("Action failed:", rideId, reason));
 
     connection.start()
         .then(() => {
@@ -31,6 +32,8 @@
     window.acceptRide = (rideId, driverId) => connection.invoke("AcceptRide", rideId, driverId);
     window.setAvailable = (driverId) => connection.invoke("SetAvailable", driverId);
     window.updateLocation = (driverId, lat, lng) => connection.invoke("UpdateLocation", driverId, lat, lng);
+    window.startRide = (rideId) => connection.invoke("StartRide", rideId);
+    window.completeRide = (rideId) => connection.invoke("CompleteRide", rideId);
     </script>
 </body>
 </html>

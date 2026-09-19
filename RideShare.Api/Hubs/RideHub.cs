@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using RideShare.Api.Services;
 using RideShare.Domain;
@@ -18,10 +19,22 @@ public class RideHub : Hub
         _locationStore = locationStore;
     }
 
-    public void UpdateLocation(Guid driverId, decimal lat, decimal lng)
+    public async Task UpdateLocation(Guid driverId, decimal lat, decimal lng)
     {
         _locationStore.UpdateLocation(driverId, lat, lng);
         Console.WriteLine($"Driver {driverId} location updated: ({lat}, {lng})");
+
+        var activeRide = await _db.Rides.FirstOrDefaultAsync(r =>
+            r.DriverId == driverId && r.Status == RideStatus.InProgress);
+
+        if (activeRide is not null)
+        {
+            var riderConnectionId = _connectionTracker.GetRiderConnection(activeRide.RiderId);
+            if (riderConnectionId is not null)
+            {
+                await Clients.Client(riderConnectionId).SendAsync("DriverLocationUpdated", activeRide.Id, lat, lng);
+            }
+        }
     }
 
     public void RegisterAsDriver(Guid driverId)
@@ -66,6 +79,59 @@ public class RideHub : Hub
         }
 
         Console.WriteLine($"Ride {rideId} accepted by driver {driverId}");
+    }
+
+    public async Task StartRide(Guid rideId)
+    {
+        var ride = await _db.Rides.FindAsync(rideId);
+        if (ride is null || ride.Status != RideStatus.Accepted)
+        {
+            await Clients.Caller.SendAsync("RideActionFailed", rideId, "Ride cannot be started.");
+            return;
+        }
+
+        ride.Status = RideStatus.InProgress;
+        await _db.SaveChangesAsync();
+
+        var riderConnectionId = _connectionTracker.GetRiderConnection(ride.RiderId);
+        if (riderConnectionId is not null)
+        {
+            await Clients.Client(riderConnectionId).SendAsync("RideStarted", rideId);
+        }
+
+        Console.WriteLine($"Ride {rideId} started.");
+    }
+
+    public async Task CompleteRide(Guid rideId)
+    {
+        var ride = await _db.Rides.FindAsync(rideId);
+        if (ride is null || ride.Status != RideStatus.InProgress)
+        {
+            await Clients.Caller.SendAsync("RideActionFailed", rideId, "Ride cannot be completed.");
+            return;
+        }
+
+        ride.Status = RideStatus.Completed;
+        await _db.SaveChangesAsync();
+
+        var riderConnectionId = _connectionTracker.GetRiderConnection(ride.RiderId);
+        if (riderConnectionId is not null)
+        {
+            await Clients.Client(riderConnectionId).SendAsync("RideCompleted", rideId);
+        }
+
+        if (ride.DriverId is not null)
+        {
+            var driver = await _db.Drivers.FindAsync(ride.DriverId.Value);
+            if (driver is not null)
+            {
+                driver.Availability = DriverAvailability.Available;
+            }
+        }
+        _locationStore.RemoveLocation(ride.DriverId ?? Guid.Empty);
+        await _db.SaveChangesAsync();
+
+        Console.WriteLine($"Ride {rideId} completed.");
     }
 
     public override async Task OnConnectedAsync()

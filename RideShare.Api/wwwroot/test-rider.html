@@ -17,6 +17,9 @@
     connection.on("RideRequested", (ride) => console.log("New ride requested:", ride));
     connection.on("RideAccepted", (rideId, driverId) => console.log("Ride accepted:", rideId, "by driver:", driverId));
     connection.on("RideAcceptFailed", (rideId) => console.log("Failed to accept ride:", rideId));
+    connection.on("RideStarted", (rideId) => console.log("Ride started:", rideId));
+    connection.on("RideCompleted", (rideId) => console.log("Ride completed:", rideId));
+    connection.on("DriverLocationUpdated", (rideId, lat, lng) => console.log("Driver location:", rideId, lat, lng));
 
     connection.start()
         .then(() => {
