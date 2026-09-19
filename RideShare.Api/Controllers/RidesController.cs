@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using RideShare.Api.Contracts;
+using RideShare.Api.Hubs;
 using RideShare.Domain;
 using RideShare.Infrastructure;
 
@@ -11,8 +13,13 @@ namespace RideShare.Api.Controllers;
 public class RidesController : ControllerBase
 {
     private readonly RideShareDbContext _db;
+    private readonly IHubContext<RideHub> _hubContext;
 
-    public RidesController(RideShareDbContext db) => _db = db;
+    public RidesController(RideShareDbContext db, IHubContext<RideHub> hubContext)
+    {
+        _db = db;
+        _hubContext = hubContext;
+    }
 
     [HttpPost]
     public async Task<ActionResult<RideResponse>> Create(CreateRideRequest request)
@@ -32,6 +39,9 @@ public class RidesController : ControllerBase
         await _db.SaveChangesAsync();
 
         var response = ToResponse(ride);
+
+        await _hubContext.Clients.All.SendAsync("RideRequested", response);
+
         return CreatedAtAction(nameof(GetById), new { id = ride.Id }, response);
     }
 
