@@ -11,6 +11,7 @@ builder.Services.AddDbContext<RideShareDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IConnectionTracker, ConnectionTracker>(); //SignalR connection tracker service as a singleton to track connected clients.
+builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStore>(); //Driver location store service as a singleton to manage driver locations.
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

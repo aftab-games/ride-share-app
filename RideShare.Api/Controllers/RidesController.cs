@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using RideShare.Api.Contracts;
 using RideShare.Api.Hubs;
+using RideShare.Api.Services;
 using RideShare.Domain;
 using RideShare.Infrastructure;
 
@@ -15,10 +16,15 @@ public class RidesController : ControllerBase
     private readonly RideShareDbContext _db;
     private readonly IHubContext<RideHub> _hubContext;
 
-    public RidesController(RideShareDbContext db, IHubContext<RideHub> hubContext)
+    private readonly IConnectionTracker _connectionTracker;
+    private readonly IDriverLocationStore _locationStore;
+
+    public RidesController(RideShareDbContext db, IHubContext<RideHub> hubContext, IConnectionTracker connectionTracker, IDriverLocationStore locationStore)
     {
         _db = db;
         _hubContext = hubContext;
+        _connectionTracker = connectionTracker;
+        _locationStore = locationStore;
     }
 
     [HttpPost]
@@ -40,9 +46,43 @@ public class RidesController : ControllerBase
 
         var response = ToResponse(ride);
 
-        await _hubContext.Clients.All.SendAsync("RideRequested", response);
+        var nearestDriverId = await FindNearestAvailableDriverAsync(request.PickupLat, request.PickupLng);
+        if (nearestDriverId is not null)
+        {
+            var connectionId = _connectionTracker.GetDriverConnection(nearestDriverId.Value);
+            if (connectionId is not null)
+            {
+                await _hubContext.Clients.Client(connectionId).SendAsync("RideRequested", response);
+            }
+        }
 
         return CreatedAtAction(nameof(GetById), new { id = ride.Id }, response);
+    }
+
+    private async Task<Guid?> FindNearestAvailableDriverAsync(decimal pickupLat, decimal pickupLng)
+    {
+        var availableDriverIds = await _db.Drivers
+            .Where(d => d.Availability == DriverAvailability.Available)
+            .Select(d => d.Id)
+            .ToListAsync();
+
+        Guid? nearestId = null;
+        double nearestDistance = double.MaxValue;
+
+        foreach (var driverId in availableDriverIds)
+        {
+            var location = _locationStore.GetLocation(driverId);
+            if (location is null) continue;
+
+            var distance = GeoUtils.DistanceKm(pickupLat, pickupLng, location.Lat, location.Lng);
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestId = driverId;
+            }
+        }
+
+        return nearestId;
     }
 
     [HttpGet("{id}")]

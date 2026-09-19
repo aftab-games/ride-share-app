@@ -9,17 +9,35 @@ public class RideHub : Hub
 {
     private readonly IConnectionTracker _connectionTracker;
     private readonly RideShareDbContext _db;
+    private readonly IDriverLocationStore _locationStore;
 
-    public RideHub(IConnectionTracker connectionTracker, RideShareDbContext db)
+    public RideHub(IConnectionTracker connectionTracker, RideShareDbContext db, IDriverLocationStore locationStore)
     {
         _connectionTracker = connectionTracker;
         _db = db;
+        _locationStore = locationStore;
+    }
+
+    public void UpdateLocation(Guid driverId, decimal lat, decimal lng)
+    {
+        _locationStore.UpdateLocation(driverId, lat, lng);
+        Console.WriteLine($"Driver {driverId} location updated: ({lat}, {lng})");
     }
 
     public void RegisterAsDriver(Guid driverId)
     {
         _connectionTracker.AddDriverConnection(driverId, Context.ConnectionId);
         Console.WriteLine($"Driver {driverId} registered on connection {Context.ConnectionId}");
+    }
+
+    public async Task SetAvailable(Guid driverId)
+    {
+        var driver = await _db.Drivers.FindAsync(driverId);
+        if (driver is not null)
+        {
+            driver.Availability = DriverAvailability.Available;
+            await _db.SaveChangesAsync();
+        }
     }
 
     public void RegisterAsRider(Guid riderId)

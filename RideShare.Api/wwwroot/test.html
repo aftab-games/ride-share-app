@@ -29,6 +29,8 @@
 
     // Expose for manual testing from the browser console:
     window.acceptRide = (rideId, driverId) => connection.invoke("AcceptRide", rideId, driverId);
+    window.setAvailable = (driverId) => connection.invoke("SetAvailable", driverId);
+    window.updateLocation = (driverId, lat, lng) => connection.invoke("UpdateLocation", driverId, lat, lng);
     </script>
 </body>
 </html>
