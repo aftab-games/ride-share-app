@@ -28,7 +28,7 @@ jobs:
       - name: Run tests
         run: dotnet test --no-build --configuration Release
 
-            - name: Check for vulnerable packages
+      - name: Check for vulnerable packages
         run: |
           OUTPUT=$(dotnet list package --vulnerable --include-transitive 2>&1)
           echo "$OUTPUT"
