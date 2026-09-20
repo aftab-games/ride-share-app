@@ -28,8 +28,14 @@ jobs:
       - name: Run tests
         run: dotnet test --no-build --configuration Release
 
-      - name: Check for vulnerable packages
-        run: dotnet list package --vulnerable --include-transitive
+            - name: Check for vulnerable packages
+        run: |
+          OUTPUT=$(dotnet list package --vulnerable --include-transitive 2>&1)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "has the following vulnerable packages"; then
+            echo "Vulnerable packages found!"
+            exit 1
+          fi
 
       - name: Build Docker image
         run: docker build -f RideShare.Api/Dockerfile -t rideshare-api .
