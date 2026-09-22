@@ -1,16 +1,8 @@
 # RideShare API
 
-A lightweight ride-sharing backend focused on real-time systems: SignalR, Redis, and geospatial matching. Built as a deliberate step up from a prior CRUD-only REST API project — scoped narrowly to avoid re-covering the same ground.
+A lightweight ride-sharing backend focused on real-time systems: SignalR, Redis, and geospatial matching.
 
-**Core loop:** rider requests a ride → nearest available driver is matched and notified in real time → driver accepts, starts, streams live location → ride completes. No polling anywhere in that flow.
-
-## Highlights
-
-- Real-time, bidirectional SignalR communication (not just request/response)
-- Redis as both a SignalR backplane and a swappable storage backend behind an interface
-- Haversine-distance nearest-driver matching
-- Ride lifecycle enforced as an explicit, unit-tested state machine
-- CI: build, test, dependency vulnerability scan, Docker image validation on every push
+**Core loop:** rider requests a ride → nearest available driver is matched and notified in real time → driver accepts, starts, streams live location → ride completes.
 
 ## Architecture
 
@@ -69,3 +61,11 @@ Manual test clients at `/test.html` (driver) and `/test-rider.html` (rider).
 ## CI
 
 GitHub Actions on every push to `main`: restore -> build -> test -> vulnerability scan -> Docker build validation.
+
+## Key Notes
+
+- Real-time, bidirectional SignalR communication (not just request/response)
+- Redis as both a SignalR backplane and a swappable storage backend behind an interface
+- Haversine-distance nearest-driver matching
+- Ride lifecycle enforced as an explicit, unit-tested state machine
+- CI: build, test, dependency vulnerability scan, Docker image validation on every push
