@@ -1,6 +1,6 @@
 # RideShare API
 
-![CI](https://github.com/aftab-games/task-manager-api/actions/workflows/dotnet-tests.yml/badge.svg)
+![CI](https://github.com/aftab-games/ride-share-app/actions/workflows/dotnet-tests.yml/badge.svg)
 
 A lightweight ride-sharing backend focused on real-time systems: SignalR, Redis, and geospatial matching.
 
